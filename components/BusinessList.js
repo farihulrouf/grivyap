@@ -2,27 +2,43 @@
 import React, { useEffect, useState } from 'react';
 import { fetchBusinesses } from '../api/api';
 
-const BusinessList = ({ page, limit }) => {
+const BusinessList = ({ initialPage = 1, limit }) => {
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchName, setSearchName] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
+  const [page, setPage] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await fetchBusinesses(page, limit, searchCategory, searchName);
-        setBusinesses(data);
+        const response = await fetchBusinesses(page, limit, searchCategory, searchName);
+        if (response && response.businesses && Array.isArray(response.businesses)) {
+          setBusinesses(response.businesses);
+          setTotalPages(response.totalPages || 1); // Set default to 1 if totalPages is undefined
+        } else {
+          setBusinesses([]);
+          setTotalPages(1);
+        }
       } catch (err) {
         setError(err);
+        setBusinesses([]);
+        setTotalPages(1);
       }
       setLoading(false);
     };
 
     fetchData();
   }, [page, limit, searchCategory, searchName]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -68,6 +84,33 @@ const BusinessList = ({ page, limit }) => {
       ) : (
         <p>No businesses found.</p>
       )}
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
+          className="border px-4 py-2 mx-1"
+        >
+          Previous
+        </button>
+        {[...Array(totalPages).keys()].map(num => (
+          <button
+            key={num + 1}
+            onClick={() => handlePageChange(num + 1)}
+            className={`border px-4 py-2 mx-1 ${page === num + 1 ? 'bg-blue-500 text-white' : ''}`}
+          >
+            {num + 1}
+          </button>
+        ))}
+        <button
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page === totalPages}
+          className="border px-4 py-2 mx-1"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
