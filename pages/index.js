@@ -1,23 +1,22 @@
-import Head from 'next/head'
-import Header from '@components/Header'
-import Footer from '@components/Footer'
+// pages/index.js
+import Head from 'next/head';
+import BusinessList from '../components/BusinessList';
 
-export default function Home() {
+const Home = () => {
   return (
-    <div className="container">
+    <div>
       <Head>
-        <title>Next.js Starter!</title>
+        <title>Business List</title>
+        <meta name="description" content="List of businesses" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        <Header title="Welcome to my app!" />
-        <p className="description">
-          Get started by editing <code>pages/index.js</code>
-        </p>
+      <main className="p-8">
+        <h1 className="text-3xl font-bold mb-8">Business List</h1>
+        <BusinessList page={1} limit={10} category="" name="" />
       </main>
-
-      <Footer />
     </div>
-  )
-}
+  );
+};
+
+export default Home;
